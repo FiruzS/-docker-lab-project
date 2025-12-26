@@ -1,0 +1,21 @@
+name: Push to Docker Hub
+
+on: [workflow_dispatch]  # Только вручную
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Скачать код
+      uses: actions/checkout@v4
+    
+    - name: 🔧 Собрать
+      run: docker build -t firuzs/lab-project:latest .
+    
+    - name: 🔐 Войти в Docker Hub
+      run: |
+        docker login -u firuzs -p ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: 🚀 Загрузить
+      run: docker push firuzs/lab-project:latest

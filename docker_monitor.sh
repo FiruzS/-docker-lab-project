@@ -3,6 +3,7 @@
 
 # Функция для показа справки
 show_help() {
+
     echo "Использование: $0 <файл_журнала> <контейнер1> [контейнер2 ...]"
     echo ""
     echo "Примеры:"
@@ -15,6 +16,10 @@ show_help() {
     echo "Скрипт будет обновлять журнал каждую минуту."
     echo "Для остановки нажмите Ctrl+C"
 }
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    show_help
+    exit 0
+fi
 
 # Проверяем аргументы
 if [ $# -lt 2 ]; then
@@ -66,12 +71,11 @@ get_container_stats() {
     local container="$1"
     
     # Получаем базовую информацию о контейнере
-    local info=$(docker inspect --format='{{.Name}}' "$container" 2>/dev/null | sed 's|/||')
-    
-    if [ -z "$info" ]; then
-        echo "Контейнер '$container' не найден!"
-        return 1
+    if ! docker inspect --format='{{.State.Running}}' "$container" 2>/dev/null | grep -q "true"; then
+    echo "Контейнер '$container' не запущен или не существует!"
+    return 1
     fi
+info=$(docker inspect --format='{{.Name}}' "$container" | sed 's|/||')
     
     # Получаем статистику в реальном времени
     local stats=$(docker stats --no-stream --format \
